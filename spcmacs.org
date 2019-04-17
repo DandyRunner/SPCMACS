@@ -2,6 +2,10 @@
 #+AUTHOR: Erwin Jansen
 #+PROPERTY: header-args :tangle yes
 
+* Header
+#+BEGIN_SRC emacs-lisp
+;;; init.el -*- lexical-binding: t; -*-
+#+END_SRC
 * Personal Information
 Personal information, to be used for instance for email and git.
 #+BEGIN_SRC emacs-lisp
@@ -72,6 +76,7 @@ Garbage collection on hold while the init scrips runs, and redirect the custom p
   (winner-mode 1)
   (put 'narrow-to-region 'disabled nil)
   (add-hook 'window-setup-hook 'toggle-frame-fullscreen t)
+  (setq auto-revert-check-vc-info t) ;;TODO - possible performance issue
 #+END_SRC
 ** Backups and auto save 
 #+BEGIN_SRC emacs-lisp
@@ -162,11 +167,57 @@ Handy tool to comment blocks of code
 * Magit
 #+BEGIN_SRC emacs-lisp
   (use-package magit
+    :ensure t
     :commands (magit-status)
     :general
     (evil-def
       "gs"  'magit-status))
  #+END_SRC
+* Theme
+Add the doom theme, as it's clean and fast
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-themes
+    :ensure t
+    :hook (after-init . load-doom-vibrant)
+    :config
+    (defun load-doom-one()
+      "Load Doom One Theme"
+      (interactive)
+      (load-theme 'doom-one))
+     (defun load-doom-light()
+      "Load Doom One Light Theme"
+      (interactive)
+      (load-theme 'doom-light))
+     (defun load-doom-vibrant()
+      "Load Doom One Vibrant Theme"
+      (interactive)
+      (load-theme 'doom-vibrant))
+     (doom-themes-visual-bell-config)
+     (doom-themes-org-config))
+#+END_SRC
+* Powerline
+Doom powerline together with the Doom theme, clean and fast
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-modeline
+    :ensure t
+    :hook (after-init . doom-modeline-mode)
+    :config
+    (setq
+     doom-modeline-buffer-file-name-style 'truncate-upto-project
+     doom-modeline-icon t
+     doom-modeline-major-mode-icon t
+     doom-modeline-major-mode-color-icon t
+     doom-modeline-minor-modes t
+     doom-modeline-word-count t
+     doom-modeline-checker-simple-format t
+     doom-modeline-vcs-max-length 12
+     doom-modeline-persp-name t
+     doom-modeline-lsp t
+     doom-modeline-github t
+     doom-modeline-github-interval (* 30 60)
+     doom-modeline-mu4e t
+     doom-modeline-ircstylize 'identity))
+#+END_SRC
 * Finishing Up
 #+BEGIN_SRC emacs-lisp
    (eval-and-compile
