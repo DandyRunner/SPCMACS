@@ -1,0 +1,181 @@
+#+TITLE: SPCMACS
+#+AUTHOR: Erwin Jansen
+#+PROPERTY: header-args :tangle yes
+
+* Personal Information
+Personal information, to be used for instance for email and git.
+#+BEGIN_SRC emacs-lisp
+(setq user-full-name "Erwin Jansen"
+      user-mail-address "echjansen@outlook.com"
+      auth-sources (list (expand-file-name "~/.authinfo.gpg")))
+#+END_SRC
+* Bootup
+Garbage collection on hold while the init scrips runs, and redirect the custom paramaters to be written in a seperate file rather than this init file (spcmacs.el)
+#+BEGIN_SRC emacs-lisp
+  (eval-and-compile
+    (setq gc-cons-threshold 402653184
+        gc-cons-percentage 0.6))
+
+  (eval-and-compile
+    (setq-default custom-file (expand-file-name "custom.el" user-emacs-directory))
+    (when (file-exists-p custom-file)
+      (load custom-file)))
+
+  (defvar temp--file-name-handler-alist file-name-handler-alist)
+  (setq file-name-handler-alist nil)
+#+END_SRC
+* Package Sources
+#+BEGIN_SRC emacs-lisp
+  ;;;We’re going to set the load-path ourselves and avoid calling (package-initilize) (for performance reasons) so we need to set package--init-file-ensured to true to tell package.el to not automatically call it on our behalf. Additionally we’re setting package-enable-at-startup to nil so that packages will not automatically be loaded for us since use-package will be handling that.
+  (eval-and-compile
+    (setq load-prefer-newer t
+          package-user-dir "~/.emacs.d/.elpa"
+          package--init-file-ensured t
+          package-enable-at-startup nil)
+
+    (unless (file-directory-p package-user-dir)
+      (make-directory package-user-dir t))
+
+    (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
+
+  (eval-when-compile
+    (require 'package)
+    ;; tells emacs not to load any packages before starting up
+    ;; the following lines tell emacs where on the internet to look up
+    ;; for new packages.
+    (setq package-archives '(("melpa"     . "https://melpa.org/packages/")
+                             ("elpa"      . "https://elpa.gnu.org/packages/")
+                             ("repo-org"  . "https://orgmode.org/elpa/")))
+    ;; (package-initialize)
+    (unless package--initialized (package-initialize t))
+
+    ;; Bootstrap `use-package'
+    (unless (package-installed-p 'use-package) ; unless it is already installed
+      (package-refresh-contents) ; updage packages archive
+      (package-install 'use-package)) ; and install the most recent version of use-package
+
+    (require 'use-package)
+    (setq use-package-always-ensure t))
+#+END_SRC
+* Sensible defaults
+#+BEGIN_SRC emacs-lisp
+  (setq fill-column 80)  ; toggle wrapping text at the 80th character
+  (setq scroll-conservatively 101)
+  (set-language-environment "UTF-8")
+  (set-default-coding-systems 'utf-8)
+  (setq-default indent-tabs-mode nil)
+  (global-hl-line-mode 1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (blink-cursor-mode 0)
+  (winner-mode 1)
+  (put 'narrow-to-region 'disabled nil)
+  (add-hook 'window-setup-hook 'toggle-frame-fullscreen t)
+#+END_SRC
+** Backups and auto save 
+#+BEGIN_SRC emacs-lisp
+  ;; Put backup files neatly away
+  (let ((backup-dir "~/.emacs.d/.backups")
+        (auto-saves-dir "~/.emacs.d/.auto-saves/"))
+    (dolist (dir (list backup-dir auto-saves-dir))
+      (when (not (file-directory-p dir))
+        (make-directory dir t)))
+    (setq backup-directory-alist `(("." . ,backup-dir))
+          auto-save-file-name-transforms `((".*" ,auto-saves-dir t))
+          auto-save-list-file-prefix (concat auto-saves-dir ".saves-")
+          tramp-backup-directory-alist `((".*" . ,backup-dir))
+          tramp-auto-save-directory auto-saves-dir))
+
+  (setq backup-by-copying t    ; Don't delink hardlinks
+        delete-old-versions t  ; Clean up the backups
+        version-control t      ; Use version numbers on backups,
+        kept-new-versions 5    ; keep some new versions
+        kept-old-versions 2)   ; and some old ones, too
+#+END_SRC
+* Which Key
+What would we be without the key popup help appearing when hitting M-x or M-c?
+In combination with general.el we also have which-key help with the leader key SPC.
+#+BEGIN_SRC emacs-lisp
+ (use-package which-key
+   :config (which-key-mode 1))
+#+END_SRC
+* General
+General is a generic package for concise key binding in emacs.
+#+BEGIN_SRC emacs-lisp 
+  (use-package general
+    :after which-key
+    :config
+    (general-override-mode 1)
+  
+    (general-create-definer evil-def
+      :states '(normal)
+      :prefix "SPC")
+
+    (general-create-definer emacs-def
+       :states '(emacs)
+       :prefix "s-SPC")
+
+    (evil-def 'normal
+      :prefix "SPC"
+      "a"  '(:ignore t :which-key "applications")
+      "f"  '(:ignore t :which-key "file")
+      "g"  '(:ignore t :which-key "git")
+      "w"  '(:ignore t :which-key "window"))
+
+    (general-def
+      :keymaps 'key-translation-map
+      "ESC" (kbd "C-g"))
+
+    (general-def
+      :prefix "C-c"
+      "a" 'org-agenda
+      "c" 'org-capture)
+    )
+#+END_SRC
+* Evil Mode
+There is no better way but vim editing. This further allows for SPC for a leader key
+#+BEGIN_SRC emacs-lisp
+(use-package evil
+  :hook (after-init . evil-mode)
+  :config
+  (setq doc-view-continues t)
+  :general
+  (evil-def
+    "wh"  '(evil-window-left :wk "window left")
+    "wl"  '(evil-window-right :wk "window right")
+    "wj"  '(evil-window-down :wk "window down")
+    "wk"  '(evil-window-up :wk "window up"))) 
+#+END_SRC 
+** Evil Commentary
+Handy tool to comment blocks of code
+#+BEGIN_SRC emacs-lisp 
+(use-package evil-commentary
+  :after evil
+  :config
+  (evil-commentary-mode 1)
+  :general
+  ('normal override-global-map
+    "gc" '(evil-commentary :wk "comment")
+    "gC" '(evil-commentary-line :wk "comment line"))) 
+#+END_SRC 
+* Magit
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :commands (magit-status)
+    :general
+    (evil-def
+      "gs"  'magit-status))
+ #+END_SRC
+* Finishing Up
+#+BEGIN_SRC emacs-lisp
+   (eval-and-compile
+     (add-hook 'emacs-startup-hook '(lambda ()
+                                      (setq gc-cons-threshold 16777216
+                                            gc-cons-percentage 0.1
+                                            file-name-handler-alist
+                                            temp--file-name-handler-alist))))
+
+   (setq initial-scratch-message (concat "Startup time: " (emacs-init-time)))
+#+END_SRC
+
