@@ -126,6 +126,7 @@ General is a generic package for concise key binding in emacs.
       "a"  '(:ignore t :which-key "applications")
       "f"  '(:ignore t :which-key "file")
       "g"  '(:ignore t :which-key "git")
+      "t"  '(:ignore t :which-key "toggle")
       "w"  '(:ignore t :which-key "window"))
 
     (general-def
@@ -184,16 +185,22 @@ Add the doom theme, as it's clean and fast
       "Load Doom One Theme"
       (interactive)
       (load-theme 'doom-one))
-     (defun load-doom-light()
+    (defun load-doom-light()
       "Load Doom One Light Theme"
       (interactive)
-      (load-theme 'doom-light))
-     (defun load-doom-vibrant()
+      (load-theme 'doom-one-light))
+    (defun load-doom-vibrant()
       "Load Doom One Vibrant Theme"
       (interactive)
       (load-theme 'doom-vibrant))
-     (doom-themes-visual-bell-config)
-     (doom-themes-org-config))
+    (doom-themes-visual-bell-config)
+    (doom-themes-org-config)
+    :general
+    (evil-def
+      "tt"  '(:ignore t :wk "themes")
+      "ttd" 'load-doom-one
+      "ttl" 'load-doom-light
+      "ttv" 'load-doom-vibrant))
 #+END_SRC
 * Powerline
 Doom powerline together with the Doom theme, clean and fast
