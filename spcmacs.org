@@ -296,27 +296,38 @@ Add the doom theme, as it's clean and fast
       "ttv" 'load-doom-vibrant))
 #+END_SRC
 * Powerline
-Doom powerline together with the Doom theme, clean and fast
-#+BEGIN_SRC emacs-lisp
-  (use-package doom-modeline
+** Doom Modeline
+ Doom powerline together with the Doom theme, clean and fast
+ #+BEGIN_SRC emacs-lisp
+   (use-package doom-modeline
+     :ensure t
+     :hook (after-init . doom-modeline-mode)
+     :config
+     (setq
+      doom-modeline-buffer-file-name-style 'truncate-upto-project
+      doom-modeline-icon t
+      doom-modeline-major-mode-icon t
+      doom-modeline-major-mode-color-icon t
+      doom-modeline-minor-modes t
+      doom-modeline-word-count t
+      doom-modeline-checker-simple-format t
+      doom-modeline-vcs-max-length 12
+      doom-modeline-persp-name t
+      doom-modeline-lsp t
+      doom-modeline-github t
+      doom-modeline-github-interval (* 30 60)
+      doom-modeline-mu4e t
+      doom-modeline-ircstylize 'identity))
+ #+END_SRC
+** Moody Modeline
+This is the latest from the develoer of Magit, and thus has potential.
+Bt still in early stages, and appears rather simple in functionality yet
+#+BEGIN_SRC emacs-lisp :tangle off
+  (use-package moody
     :ensure t
-    :hook (after-init . doom-modeline-mode)
     :config
-    (setq
-     doom-modeline-buffer-file-name-style 'truncate-upto-project
-     doom-modeline-icon t
-     doom-modeline-major-mode-icon t
-     doom-modeline-major-mode-color-icon t
-     doom-modeline-minor-modes t
-     doom-modeline-word-count t
-     doom-modeline-checker-simple-format t
-     doom-modeline-vcs-max-length 12
-     doom-modeline-persp-name t
-     doom-modeline-lsp t
-     doom-modeline-github t
-     doom-modeline-github-interval (* 30 60)
-     doom-modeline-mu4e t
-     doom-modeline-ircstylize 'identity))
+    (moody-replace-mode-line-buffer-identification)
+    (moody-replace-vc-mode))
 #+END_SRC
 * Finishing Up
 #+BEGIN_SRC emacs-lisp
