@@ -116,23 +116,49 @@ General is a generic package for concise key binding in emacs.
     :config
     (general-override-mode 1)
 
+    (defun find-user-init-file ()
+      "Edit the `user-init-file', in the same window."
+      (interactive)
+      (find-file (expand-file-name "spcmacs.org" user-emacs-directory)))
+
+    (defun load-user-init-file ()
+      "Load the `user-init-file', in same window."
+      (interactive)
+      (load-file user-init-file))
+
+    (defun rename-file-and-buffer ()
+      "Rename the current buffer and file it is visiting."
+      (interactive)
+      (let ((filename (buffer-file-name)))
+        (if (not (and filename (file-exists-p filename)))
+            (message "Buffer is not visiting a file!")
+          (let ((new-name (read-file-name "New name: " filename)))
+            (cond
+             ((vc-backend filename) (vc-rename-file filename new-name))
+             (t
+              (rename-file filename new-name t)
+              (set-visited-file-name new-name t t)))))))
+
     (general-create-definer evil-def
       :states '(normal)
       :prefix "SPC")
 
     (general-create-definer emacs-def
-       :states '(emacs)
-       :prefix "s-SPC")
+      :states '(emacs)
+      :prefix "s-SPC")
 
     (evil-def 'normal
       :prefix "SPC"
-      "a"  '(:ignore t :which-key "applications")
-      "b"  '(:ignore t :which-key "buffer")
-      "f"  '(:ignore t :which-key "file")
-      "g"  '(:ignore t :which-key "git")
-      "s"  '(:ignore t :which-key "search")
-      "t"  '(:ignore t :which-key "toggle")
-      "w"  '(:ignore t :which-key "window"))
+      "a"   '(:ignore t :which-key "applications")
+      "b"   '(:ignore t :which-key "buffer")
+      "f"   '(:ignore t :which-key "file")
+      "fe"  '(:ignore t :which-key "emacs")
+      "fed" 'find-user-init-file
+      "feR" 'load-user-init-file
+      "g"   '(:ignore t :which-key "git")
+      "s"   '(:ignore t :which-key "search")
+      "t"   '(:ignore t :which-key "toggle")
+      "w"   '(:ignore t :which-key "window")) 
 
     (general-def
       :keymaps 'key-translation-map
