@@ -220,23 +220,23 @@ An Ivy-enhanced alternative to isearch.
 * Auto Completion
 ** Company
 Company is an auto completion tool for programming languages.
-For some reason it isn't working in this configuration. TODO
 #+BEGIN_SRC emacs-lisp
   (use-package company
-    ;;  :hook (after-init . global-company-mode)
+    :hook (after-init . global-company-mode)
     :commands (company-complete-common
                company-manual-begin
                company-grab-line)
     :init
     (progn
-      (setq company-idle-delay nil
+      (setq company-idle-delay .1
             company-tooltip-limit 10
             company-tooltip-align-annotations t
             company-minimum-prefix-length 2
             company-require-match 'never
             company-dabbrev-code-other-buffers t
             company-dabbrev-ignore-case nil
-            company-dabbrev-downcase nil))
+            company-dabbrev-downcase nil
+            ))
     :config
     (progn
       (setq company-backends
@@ -245,7 +245,6 @@ For some reason it isn't working in this configuration. TODO
               company-capf
               company-dabbrev-code
               company-dabbrev))
-      (global-company-mode 1)
       (setq company-frontends '(company-echo-metadata-frontend
                                 company-pseudo-tooltip-unless-just-one-frontend
                                 company-preview-frontend))
@@ -257,6 +256,13 @@ For some reason it isn't working in this configuration. TODO
     (general-def
       "C-n"  'company-select-next
       "C-p"  'company-select-previous))
+#+END_SRC
+** Auto Complete
+Since Company mode does not appear to kick in - lets try auto-complete mode.
+#+BEGIN_SRC emacs-lisp :tangle off
+  (use-package auto-complete
+    :config
+    (ac-config-default))
 #+END_SRC
 * Magit
 #+BEGIN_SRC emacs-lisp
