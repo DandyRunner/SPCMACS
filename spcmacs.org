@@ -189,8 +189,11 @@ In combination with general.el we also have which-key help with the leader key S
  (use-package which-key
    :config (which-key-mode 1))
 #+END_SRC
-* General
+* Keybindings
 General is a generic package for concise key binding in emacs.
+This configuration sets up a spacemacs like keybinding - here using emacs default functions,
+that can be overiden later by installed packages to provide more complete functions.
+** The General Package
 #+BEGIN_SRC emacs-lisp 
   (use-package general
     :after which-key
@@ -228,19 +231,6 @@ General is a generic package for concise key binding in emacs.
       :states '(emacs)
       :prefix "s-SPC")
 
-    (evil-def 'normal
-      :prefix "SPC"
-      "a"   '(:ignore t :which-key "applications")
-      "b"   '(:ignore t :which-key "buffer")
-      "f"   '(:ignore t :which-key "file")
-      "fe"  '(:ignore t :which-key "emacs")
-      "fed" 'find-user-init-file
-      "feR" 'load-user-init-file
-      "g"   '(:ignore t :which-key "git")
-      "s"   '(:ignore t :which-key "search")
-      "t"   '(:ignore t :which-key "toggle")
-      "w"   '(:ignore t :which-key "window")) 
-
     (general-def
       :keymaps 'key-translation-map
       "ESC" (kbd "C-g"))
@@ -248,7 +238,58 @@ General is a generic package for concise key binding in emacs.
     (general-def
       :prefix "C-c"
       "a" 'org-agenda
-      "c" 'org-capture)
+     "c" 'org-capture)
+#+END_SRC     
+** SPC
+#+BEGIN_SRC emacs-lisp
+     (evil-def 'normal
+      :prefix "SPC"
+      "a"   '(:ignore t :which-key "applications")
+      "b"   '(:ignore t :which-key "buffer")
+      "f"   '(:ignore t :which-key "file")
+      "fe"  '(:ignore t :which-key "emacs")
+      "g"   '(:ignore t :which-key "git")
+      "h"   '(:ignore t :which-key "help")
+      "s"   '(:ignore t :which-key "search")
+      "t"   '(:ignore t :which-key "toggle")
+      "w"   '(:ignore t :which-key "window")) 
+#+END_SRC
+** SPC f - File
+#+BEGIN_SRC emacs-lisp
+  (general-def
+    :prefix "SPC f"
+    :states '(normal visual)
+    :keymaps 'override
+    "d"  '(fd-dired :wk "unknown")
+    "ed" '(find-user-init-file :wk "edit user config")
+    "eR" '(load-user-init-file :wk "reload user config")
+    "f"  '(find-file :wk "find file")
+    "s"  '(save-buffer :wk "save file"))
+#+END_SRC
+** SPC h - Help
+#+BEGIN_SRC emacs-lisp
+  (general-def
+    :prefix "SPC h"
+    :states '(normal visual)
+    :keymaps 'override
+    "d" '(:ignore t :wk "describe")
+    "db" '(describe-bindings :wk "describe bindings")
+    "dc" '(describe-char :wk "describe character")
+    "df" '(describe-function :wk "describe function")
+    "dk" '(describe-key :wk "describe key")
+    "dm" '(describe-mode :wk "describe mode")
+    "dp" '(describe-package :wk "describe package")
+    "dv" '(describe-variable :wk "describe variable")
+    "dt" '(describe-theme :wk "describe theme")
+    "ds" '(describe-symbol :wk "describe symbol")
+    "i"  '(info :wk "info")
+    "I"  '(info-display-manual :wk "info from manual")
+    "l"  '(find-library :wk "find library")
+    "n"  '(view-emacs-news :wk "emacs news")
+    "w"  '(woman :wk "woman"))
+#+END_SRC
+** The End
+#+BEGIN_SRC emacs-lisp
     )
 #+END_SRC
 * Evil Mode
@@ -285,7 +326,8 @@ Handy tool to comment blocks of code
 ** Ivy
 Ivy is for quick and easy selection from a list. 
 When Emacs prompts for a string from a list of several possible choices, 
-Ivy springs into action to assist in narrowing and picking the right string from a vast number of choices. 
+Ivy springs into action to assist in narrowing and picking the right string from a vast number of choices.
+In short - it provides an interface to list, search, filter and perform actions on a collection of "things".
 #+BEGIN_SRC emacs-lisp
   (use-package ivy
     :hook (after-init . ivy-mode)
@@ -295,7 +337,8 @@ Ivy springs into action to assist in narrowing and picking the right string from
       (setq ivy-use-virtual-buffers t
             ivy-count-format "(%d/%d) "
             ivy-truncate-lines nil
-            ivy-initial-inputs-alist nil)
+            ivy-initial-inputs-alist nil
+            ivy-display-style 'fancy)
       (setq ivy-re-builders-alist
             '((t . ivy--regex-plus))))
     :general
@@ -303,19 +346,31 @@ Ivy springs into action to assist in narrowing and picking the right string from
       "bm"  'ivy-switch-buffer))
 #+END_SRC
 ** Counsel
-A collection of Ivy-enhanced versions of common Emacs commands
+To keep concerns separated, Ivy doesn't have a lot of other functionality.
+Counsel provides a collection of Ivy-enhanced versions of common Emacs commands.
 #+BEGIN_SRC emacs-lisp
-    (use-package counsel
-      :after ivy
-      :general
-      (general-def
-        "M-x"      '(counsel-M-x :wk "M-x")
-        "C-x C-f"  '(counsel-find-file :wk "find file"))
-      (evil-def
-        "SPC"      '(counsel-M-x :wk "M-x")
-        "ff"       '(counsel-find-file :wk "find file")
-        "fr"       '(counsel-recentf :wk "recent files")
-        "fL"       '(counsel-locate :wk "locate file")))
+  (use-package counsel
+    :after ivy
+    :bind (("C-c C-r" . ivy-resume))
+    :general
+    (general-def
+      "M-x"      '(counsel-M-x :wk "M-x")
+      "C-x C-f"  '(counsel-find-file :wk "find file"))
+    (general-def
+      :prefix "SPC"
+      :states '(normal visual)
+      :keymaps 'override
+      ;; SPC
+      "SPC"      '(counsel-M-x :wk "M-x")
+      ;; SPC f - File
+      "ff"       '(counsel-find-file :wk "find file")
+      "fr"       '(counsel-recentf :wk "recent files")
+      "fL"       '(counsel-locate :wk "locate file")
+      ;; SPC h d -Help Describe
+      "hdb" '(counsel-descbinds :wk "describe bindings")
+      "hdf" '(counsel-describe-function :wk "describe function")
+      "hdv" '(counsel-describe-variable :wk "describe variable")
+      "hds" '(counsel-info-lookup-symbol :wk "describe symbol")))
 #+END_SRC
 ** Swiper
 An Ivy-enhanced alternative to isearch.
