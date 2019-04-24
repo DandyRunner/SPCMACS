@@ -242,17 +242,20 @@ that can be overiden later by installed packages to provide more complete functi
 #+END_SRC     
 ** SPC
 #+BEGIN_SRC emacs-lisp
-     (evil-def 'normal
-      :prefix "SPC"
-      "a"   '(:ignore t :which-key "applications")
-      "b"   '(:ignore t :which-key "buffer")
-      "f"   '(:ignore t :which-key "file")
-      "fe"  '(:ignore t :which-key "emacs")
-      "g"   '(:ignore t :which-key "git")
-      "h"   '(:ignore t :which-key "help")
-      "s"   '(:ignore t :which-key "search")
-      "t"   '(:ignore t :which-key "toggle")
-      "w"   '(:ignore t :which-key "window")) 
+  (general-def
+    :prefix "SPC"
+    :states '(normal visual)
+    :keymaps 'override
+    "a"   '(:ignore t :which-key "applications")
+    "b"   '(:ignore t :which-key "buffer")
+    "f"   '(:ignore t :which-key "file")
+    "fe"  '(:ignore t :which-key "emacs")
+    "g"   '(:ignore t :which-key "git")
+    "h"   '(:ignore t :which-key "help")
+    "p"   'projectile-command-map
+    "s"   '(:ignore t :which-key "search")
+    "t"   '(:ignore t :which-key "toggle")
+    "w"   '(:ignore t :which-key "window")) 
 #+END_SRC
 ** SPC f - File
 #+BEGIN_SRC emacs-lisp
@@ -342,8 +345,18 @@ In short - it provides an interface to list, search, filter and perform actions 
       (setq ivy-re-builders-alist
             '((t . ivy--regex-plus))))
     :general
-    (evil-def
-      "bm"  'ivy-switch-buffer))
+    (general-def
+      :prefix "SPC"
+      :states '(normal visual)
+      :keymaps 'override
+      ;; SPC b - Buffer
+      "bm"  '(ivy-switch-buffer :wk "switch to buffer")))
+
+  ;; Used by Ivy to sort commands by frequency
+  (use-package smex
+    :hook (after-init . smex-initialize)
+    :config
+    (global-set-key (kbd "M-X") 'smex-major-mode-commands))
 #+END_SRC
 ** Counsel
 To keep concerns separated, Ivy doesn't have a lot of other functionality.
@@ -382,6 +395,22 @@ An Ivy-enhanced alternative to isearch.
       "C-s"  'swiper)
     (evil-def
       "ss"  'swiper))
+#+END_SRC
+* Projects
+Some tools that help when working with projects
+** Projectile
+provide a nice set of features operating on a project level without introducing external dependencies (when feasible)
+#+BEGIN_SRC emacs-lisp
+  (use-package projectile
+    :defer t
+    :config
+    (projectile-mode +1))
+#+END_SRC
+** Projectile Counsel
+Counsel filtering support for projectile
+#+BEGIN_SRC emacs-lisp
+  (use-package counsel-projectile
+    :hook (after-init . counsel-projectile-mode))
 #+END_SRC
 * Auto Completion
 ** Company
