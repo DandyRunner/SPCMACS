@@ -140,6 +140,14 @@ Now that we are ready to laod packages, we need to make sure we will keep our mo
   (use-package diminish
     :ensure t)
 #+END_SRC
+* Emacs
+** IBuffer
+I buffer provides need lists
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer
+    :bind
+    ([remap list-buffers] . ibuffer))
+#+END_SRC
 * Sensible defaults
 When using the graphical system in linux it is faster to create an .Xresources file in the home folder.
 This speeds up emacs considerably. 
@@ -483,15 +491,23 @@ Some tools that help when working with projects
 provide a nice set of features operating on a project level without introducing external dependencies (when feasible)
 #+BEGIN_SRC emacs-lisp
   (use-package projectile
-    :defer t
-    :config
-    (projectile-mode +1))
+    :ensure t
+    :custom
+    (projectile-project-root-files-functions
+     '(projectile-root-local
+       projectile-root-top-down
+       projectile-root-bottom-up
+       projectile-root-top-down-recurring))
+    (projectile-completion-system 'ivy))
 #+END_SRC
 ** Projectile Counsel
 Counsel filtering support for projectile
 #+BEGIN_SRC emacs-lisp
   (use-package counsel-projectile
-    :hook (after-init . counsel-projectile-mode))
+    :ensure t
+    :after counsel projectile
+    :config
+    (counsel-projectile-mode))
 #+END_SRC
 * Auto Completion
 ** Company
@@ -548,7 +564,7 @@ The best reason for using emacs. org Mode provides a complete oragnisation tool.
   (use-package org
     :defer t
     ;;ensure we load the latest version of org
-    :ensure org-plus-contrib
+;;    :ensure org-plus-contrib
     :hook 
     ;; Wrap long lines while in org mode
     (org-mode . visual-line-mode)
@@ -573,6 +589,31 @@ Lets have some better looking bullets for our headers
     (org-ellipsis "▼")
     :hook
     (org-mode . org-bullets-mode))
+#+END_SRC
+* Programming
+** Ibuffer Version Control
+Pretty list buffer for version controlled files
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer-vc
+    :ensure t
+    :config
+    (define-ibuffer-column icon (:name "Icon" :inline t)
+      (all-the-icons-ivy--icon-mode major-mode))
+    :custom
+    (ibuffer-formats
+     '((mark modified read-only vc-status-mini " "
+             (name 18 18 :left :elide)
+             " "
+             (size 9 -1 :right)
+             " "
+             (mode 16 16 :left :elide)
+             " "
+             filename-and-process)) "include vc status info")
+    :hook
+    (ibuffer . (lambda ()
+                 (ibuffer-vc-set-filter-groups-by-vc-root)
+                 (unless (eq ibuffer-sorting-mode 'alphabetic)
+                   (ibuffer-do-sort-by-alphabetic)))))
 #+END_SRC
 * Version Control
 ** Magit
@@ -996,7 +1037,7 @@ Our configuration file has loaded. Time to enable garbage collection again, and 
                                             file-name-handler-alist
                                             temp--file-name-handler-alist))))
 
-   (setq dashboard-banner-logo-title (concat "Welcome to Emacs " user-full-name ". Startup time: " (emacs-init-time)))
+   (setq dashboard-banner-logo-title (concat "Welcome to Emacs: " user-full-name ". Startup time: " (emacs-init-time)))
 #+END_SRC
 Tangle this file to create the spcmacs.el file, which speeds up loading emacs.
 #+BEGIN_SRC emcas-lisp
@@ -1004,4 +1045,4 @@ Tangle this file to create the spcmacs.el file, which speeds up loading emacs.
 #+END_SRC
 * Notes
 ** Profiling
-Install esup, and run the commmand form the commandline.
+Install esup, and run the commmand form the commandline....
