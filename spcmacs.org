@@ -419,33 +419,32 @@ When Emacs prompts for a string from a list of several possible choices,
 Ivy springs into action to assist in narrowing and picking the right string from a vast number of choices.
 In short - it provides an interface to list, search, filter and perform actions on a collection of "things".
 #+BEGIN_SRC emacs-lisp
-  (use-package ivy
-    :ensure t
-    :hook (after-init . ivy-mode)
-    :commands (ivy-switch-buffer)
-    :diminish ivy-mode
-    :config
-    (progn
-      (setq ivy-use-virtual-buffers t
-            ivy-count-format "(%d/%d) "
-            ivy-truncate-lines nil
-            ivy-initial-inputs-alist nil
-            ivy-display-style 'fancy)
-      (setq ivy-re-builders-alist
-            '((t . ivy--regex-plus))))
-    :general
-    (general-def
-      :prefix "SPC"
-      :states '(normal visual)
-      :keymaps 'override
-      ;; SPC b - Buffer
-      "bm"  '(ivy-switch-buffer :wk "switch to buffer")))
+    (use-package ivy
+      :ensure t
+      :hook (after-init . ivy-mode)
+      :commands (ivy-switch-buffer)
+      :diminish ivy-mode
+      :config
+      (progn
+        (setq ivy-use-virtual-buffers t
+              ivy-count-format "(%d/%d) "
+              ivy-truncate-lines nil
+              ivy-initial-inputs-alist nil
+              ivy-display-style 'fancy)
+        (setq ivy-re-builders-alist
+              '((t . ivy--regex-plus))))
+     :general
+     (general-def
+       :prefix "SPC"
+        :states '(normal visual)
+        :keymaps 'override
+        "bm"  '(ivy-switch-buffer :wk "switch to buffer")))
 
-  ;; Used by Ivy to sort commands by frequency
-  (use-package smex
-    :hook (after-init . smex-initialize)
-    :config
-    (global-set-key (kbd "M-X") 'smex-major-mode-commands))
+    ;; Used by Ivy to sort commands by frequency
+    (use-package smex
+      :hook (after-init . smex-initialize)
+      :config
+      (global-set-key (kbd "M-X") 'smex-major-mode-commands))
 #+END_SRC
 ** Counsel
 To keep concerns separated, Ivy doesn't have a lot of other functionality.
@@ -591,7 +590,7 @@ Lets have some better looking bullets for our headers
     (org-mode . org-bullets-mode))
 #+END_SRC
 * Programming
-** Ibuffer Version Control
+** Ibuffer Version Control - called with C-x C-b (ibuffer-list-buffers)
 Pretty list buffer for version controlled files
 #+BEGIN_SRC emacs-lisp
   (use-package ibuffer-vc
@@ -608,7 +607,9 @@ Pretty list buffer for version controlled files
              " "
              (mode 16 16 :left :elide)
              " "
-             filename-and-process)) "include vc status info")
+             (vc-status 16 16 :left)
+             " "
+             vc-relative-file)))
     :hook
     (ibuffer . (lambda ()
                  (ibuffer-vc-set-filter-groups-by-vc-root)
