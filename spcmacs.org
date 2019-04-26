@@ -113,7 +113,9 @@ Garbage collection on hold while the init scrips runs, and redirect the custom p
       (make-directory package-user-dir t))
 
     (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
+#+END_SRC
 
+#+BEGIN_SRC emacs-lisp
   (eval-when-compile
     (require 'package)
     ;; tells emacs not to load any packages before starting up
@@ -132,6 +134,11 @@ Garbage collection on hold while the init scrips runs, and redirect the custom p
 
     (require 'use-package)
     (setq use-package-always-ensure t))
+#+END_SRC
+Now that we are ready to laod packages, we need to make sure we will keep our modeline clean by using the dimish package.
+#+BEGIN_SRC emacs-lisp
+  (use-package diminish
+    :ensure t)
 #+END_SRC
 * Sensible defaults
 When using the graphical system in linux it is faster to create an .Xresources file in the home folder.
@@ -256,8 +263,10 @@ And now for the common defaults
 What would we be without the key popup help appearing when hitting M-x or M-c?
 In combination with general.el we also have which-key help with the leader key SPC.
 #+BEGIN_SRC emacs-lisp
- (use-package which-key
-   :config (which-key-mode 1))
+  (use-package which-key
+    :ensure t
+    :diminish which-key-mode
+    :config (which-key-mode 1))
 #+END_SRC
 * Keybindings
 General is a generic package for concise key binding in emacs.
@@ -403,8 +412,10 @@ Ivy springs into action to assist in narrowing and picking the right string from
 In short - it provides an interface to list, search, filter and perform actions on a collection of "things".
 #+BEGIN_SRC emacs-lisp
   (use-package ivy
+    :ensure t
     :hook (after-init . ivy-mode)
     :commands (ivy-switch-buffer)
+    :diminish ivy-mode
     :config
     (progn
       (setq ivy-use-virtual-buffers t
@@ -491,6 +502,7 @@ Company is an auto completion tool for programming languages.
     :commands (company-complete-common
                company-manual-begin
                company-grab-line)
+    :diminish company-mode
     :init
     (progn
       (setq company-idle-delay .1
@@ -578,6 +590,8 @@ The second next best reason to use emacs. The Magit package provides an excellen
 *** Theme Tools
 #+BEGIN_SRC emacs-lisp
   (use-package rainbow-mode
+    :ensure t
+    :diminish rainbow-mode
     :commands (rainbow-mode))
 #+END_SRC
 *** Doom Themes
