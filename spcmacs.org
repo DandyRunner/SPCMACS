@@ -583,7 +583,6 @@ The second next best reason to use emacs. The Magit package provides an excellen
 *** Doom Themes
  #+BEGIN_SRC emacs-lisp
    (use-package doom-themes
-     :hook (after-init . load-doom-one-light)
      :config
      (doom-themes-org-config)
      (defun load-doom-one ()
@@ -601,8 +600,8 @@ The second next best reason to use emacs. The Magit package provides an excellen
      (defun load-doom-tomorrow-blue ()
        "Load the Doom Vibrant theme"
        (interactive)
-       ;;  (load-theme 'doom-tomorrow-blue))
-       (load-file (expand-file-name "+doom-tomorrow-blue.el" user-emacs-directory)))
+       (load-theme 'sanityinc-tomorrow-blue))
+       ;; (load-file (expand-file-name "+doom-tomorrow-blue.el" user-emacs-directory)))
      (defun load-doom-tomorrow-night ()
        "Load the Doom Vibrant theme"
        (interactive)
@@ -615,6 +614,31 @@ The second next best reason to use emacs. The Magit package provides an excellen
        "tdb" 'load-doom-tomorrow-blue
        "tdn" 'load-doom-tomorrow-night))
  #+END_SRC
+*** Sanityinc Themes
+ #+BEGIN_SRC emacs-lisp
+ (use-package color-theme-sanityinc-tomorrow
+   :ensure t
+   :hook (after-init . load-sanityinc-blue)
+   :config
+   (defun load-sanityinc-blue()
+     "Load the Sanityinc Blue theme"
+     (interactive)
+     (load-theme 'sanityinc-tomorrow-blue))
+    (defun load-sanityinc-dark()
+     "Load the Sanityinc Dark theme"
+     (interactive)
+     (load-theme 'sanityinc-tomorrow-night))
+   (defun load-sanityinc-light()
+     "Load the Sanityinc Light theme"
+     (interactive)
+     (load-theme 'sanityinc-tomorrow-day))
+   :general
+   (evil-def 
+     "ts" '(:ignore t :which-key "tomorrow")
+     "tsb" 'load-sanityinc-blue
+     "tsd" 'load-sanityinc-dark
+     "tsl" 'load-sanityinc-light))
+#+END_SRC
 *** Doom One Blue Custom
 #+BEGIN_SRC emacs-lisp :tangle off
   (require 'doom-themes)
@@ -899,29 +923,6 @@ Personal attempt at bringing the blue theme to Doom Blue :)
 
      (provide 'doom-tomorrow-blue-theme)
  #+END_SRC
-*** Sanityinc Themes
- #+BEGIN_SRC emacs-lisp
- (use-package color-theme-sanityinc-tomorrow
-   :ensure t
-   :config
-   (defun load-sanityinc-blue()
-     "Load the Sanityinc Blue theme"
-     (interactive)
-     (load-theme 'sanityinc-tomorrow-blue))
-    (defun load-sanityinc-dark()
-     "Load the Sanityinc Dark theme"
-     (interactive)
-     (load-theme 'sanityinc-tomorrow-night))
-   (defun load-sanityinc-light()
-     "Load the Sanityinc Light theme"
-     (interactive)
-     (load-theme 'sanityinc-tomorrow-day))
-   :general
-   (evil-def "ts" '(:ignore t :which-key "sanityinc")
-     "tsb" 'load-sanityinc-blue
-     "tsd" 'load-sanityinc-dark
-     "tsl" 'load-sanityinc-light))
-#+END_SRC* Powerline
 ** Modeline
 *** Doom Modeline
  Doom powerline together with the Doom theme, clean and fast
