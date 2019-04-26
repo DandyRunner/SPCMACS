@@ -573,15 +573,14 @@ The second next best reason to use emacs. The Magit package provides an excellen
     (evil-def
       "gs"  'magit-status))
  #+END_SRC
-* Themes
-** Theme Tools
+* UI
+** Themes
+*** Theme Tools
 #+BEGIN_SRC emacs-lisp
   (use-package rainbow-mode
-    :ensure t
-    :config
-    (rainbow-mode t))
+    :commands (rainbow-mode))
 #+END_SRC
-** Doom Themes
+*** Doom Themes
  #+BEGIN_SRC emacs-lisp
    (use-package doom-themes
      :hook (after-init . load-doom-one-light)
@@ -616,7 +615,7 @@ The second next best reason to use emacs. The Magit package provides an excellen
        "tdb" 'load-doom-tomorrow-blue
        "tdn" 'load-doom-tomorrow-night))
  #+END_SRC
-** Doom One Blue Custom
+*** Doom One Blue Custom
 #+BEGIN_SRC emacs-lisp :tangle off
   (require 'doom-themes)
 
@@ -785,7 +784,7 @@ The second next best reason to use emacs. The Magit package provides an excellen
     ;; ()
     )
 #+END_SRC
-** Doom Themes Blue (Custom)
+*** Doom Themes Blue (Custom)
 Personal attempt at bringing the blue theme to Doom Blue :)
   #+BEGIN_SRC emacs-lisp :tangle off 
     (require 'doom-themes)
@@ -900,7 +899,7 @@ Personal attempt at bringing the blue theme to Doom Blue :)
 
      (provide 'doom-tomorrow-blue-theme)
  #+END_SRC
-** Sanityinc Themes
+*** Sanityinc Themes
  #+BEGIN_SRC emacs-lisp
  (use-package color-theme-sanityinc-tomorrow
    :ensure t
@@ -923,8 +922,8 @@ Personal attempt at bringing the blue theme to Doom Blue :)
      "tsd" 'load-sanityinc-dark
      "tsl" 'load-sanityinc-light))
 #+END_SRC* Powerline
-* Modeline
-** Doom Modeline
+** Modeline
+*** Doom Modeline
  Doom powerline together with the Doom theme, clean and fast
  #+BEGIN_SRC emacs-lisp
    (use-package doom-modeline
@@ -947,7 +946,7 @@ Personal attempt at bringing the blue theme to Doom Blue :)
       doom-modeline-mu4e t
       doom-modeline-ircstylize 'identity))
  #+END_SRC
-** Moody Modeline
+*** Moody Modeline
  This is the latest from the develoer of Magit, and thus has potential.
  Bt still in early stages, and appears rather simple in functionality yet
  #+BEGIN_SRC emacs-lisp :tangle off
@@ -957,6 +956,21 @@ Personal attempt at bringing the blue theme to Doom Blue :)
      (moody-replace-mode-line-buffer-identification)
      (moody-replace-vc-mode))
  #+END_SRC
+** Dashboard
+Provide a decend startup screen.
+#+BEGIN_SRC emacs-lisp
+  (use-package dashboard
+    :ensure t
+    :config
+    (dashboard-setup-startup-hook)
+    :custom
+    (initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+    (dashboard-items '((agenda . 5)
+                       (recents . 5)
+                       (projects . 5)
+                       (registers . 5)
+                       (bookmarks . 5))))
+#+END_SRC
 * Finishing Up
 Our configuration file has loaded. Time to enable garbage collection again, and display the time it took to load.
 #+BEGIN_SRC emacs-lisp
@@ -967,7 +981,7 @@ Our configuration file has loaded. Time to enable garbage collection again, and 
                                             file-name-handler-alist
                                             temp--file-name-handler-alist))))
 
-   (setq initial-scratch-message (concat "Startup time: " (emacs-init-time)))
+   (setq dashboard-banner-logo-title (concat "Welcome to Emacs " user-full-name ". Startup time: " (emacs-init-time)))
 #+END_SRC
 Tangle this file to create the spcmacs.el file, which speeds up loading emacs.
 #+BEGIN_SRC emcas-lisp
