@@ -401,20 +401,25 @@ that can be overiden later by installed packages to provide more complete functi
 ** ace-window
 We need a way to select, swap, move, etc windows. Windows is ace :).
 #+BEGIN_SRC emacs-lisp
-  (use-package ace-window
-    :ensure t
-    :custom
-    (aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9) "Use numbers for selecting window.")
-    (aw-scope 'frame "Highlight only current frame.")
-    (aw-dispatch-always t "All functions work for two windows too")
-    :bind
-    ("M-o" . ace-window)
-    :general
-    (general-def
-      :prefix "SPC"
-      :states '(normal visual)
-      :keymaps 'override
-      "ww"  '(ace-select-window :wk "select window")))
+      (use-package ace-window
+        :ensure t
+        :custom
+        (aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9) "Use numbers for selecting window.")
+        (aw-scope 'frame "Highlight only current frame.")
+        (aw-dispatch-always t "All functions work for two windows too")
+        (ace-window-display-mode t "Always show the window number")
+        :bind
+        ("M-o" . ace-window)
+        :general
+        (general-def
+          :prefix "SPC"
+          :states '(normal visual)
+          :keymaps 'override
+          "wd"  '(ace-delete-window :wk "delete")
+          "wD"  '(ace-delete-other-windows :wk "delete others")
+          "wm"  '(ace-maximize-window :wk "maximize")
+          "ws"  '(ace-swap-window   :wk "swap")
+          "ww"  '(ace-select-window :wk "select"))) 
 #+END_SRC
 * Evil Mode
 There is no better way but vim editing. This further allows for SPC for a leader key
