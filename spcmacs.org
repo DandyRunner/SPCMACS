@@ -110,8 +110,42 @@ Garbage collection on hold while the init scrips runs, and redirect the custom p
   (setq file-name-handler-alist nil)
 #+END_SRC
 * Package Sources
+** Local mirror
+Here is fo r local mirror:
 #+BEGIN_SRC emacs-lisp
-  ;;;We’re going to set the load-path ourselves and avoid calling (package-initilize) (for performance reasons) so we need to set package--init-file-ensured to true to tell package.el to not automatically call it on our behalf. Additionally we’re setting package-enable-at-startup to nil so that packages will not automatically be loaded for us since use-package will be handling that.
+  (eval-when-compile
+    (require 'package)
+    (setq package-archives
+	  `(("melpa" . ,(concat "/home/ejansen/" ".elpa-mirror/melpa/"))
+	    ("org"   . ,(concat "/home/ejansen/" ".elpa-mirror/org/"))
+	    ("gnu"   . ,(concat "/home/ejansen/" ".elpa-mirror/gnu/")))))
+#+END_SRC
+** Remote mirror
+Here is the remote mirror, if you want the exact same packages (tested):
+#+BEGIN_SRC emacs-lisp :tangle off
+  (eval-when-compile
+    (require 'package)
+    (setq package-archives
+	  '(("melpa" . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/melpa/")
+	    ("org"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/org/")
+	    ("gnu"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/"))))
+#+END_SRC
+** Standard melpa, elpa and org repositories
+#+BEGIN_SRC emacs-lisp :tangle off
+  (eval-when-compile
+    (require 'package)
+    ;; tells emacs not to load any packages before starting up
+    ;; the following lines tell emacs where on the internet to look up
+    ;; for new packages.
+    (setq package-archives '(
+			       ("melpa"   . "https://melpa.org/packages/")
+			       ("elpa"    . "https://elpa.gnu.org/packages/")
+			       ("org"     . "https://orgmode.org/elpa/"))))
+#+END_SRC
+** Use-package 
+Set the load-path and avoid calling /package-initialize/ for performance reasons, by setting package--init-file-ensured to true which tells package.el to not automatically call it on our behalve. 
+Additionally set package-enable-at-startup to nil to pacakages will not automatically be loaded, sicne use-package will take care of this.
+#+BEGIN_SRC emacs-lisp
   (eval-and-compile
     (setq load-prefer-newer t
           package-user-dir "~/.emacs.d/.elpa"
@@ -121,18 +155,8 @@ Garbage collection on hold while the init scrips runs, and redirect the custom p
     (unless (file-directory-p package-user-dir)
       (make-directory package-user-dir t))
 
-    (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
-#+END_SRC
+    (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t)))
 
-#+BEGIN_SRC emacs-lisp
-  (eval-when-compile
-    (require 'package)
-    ;; tells emacs not to load any packages before starting up
-    ;; the following lines tell emacs where on the internet to look up
-    ;; for new packages.
-    (setq package-archives '(("melpa"     . "https://melpa.org/packages/")
-                             ("elpa"      . "https://elpa.gnu.org/packages/")
-                             ("org"       . "https://orgmode.org/elpa/")))
     ;; (package-initialize)
     (unless package--initialized (package-initialize t))
 
@@ -141,13 +165,9 @@ Garbage collection on hold while the init scrips runs, and redirect the custom p
       (package-refresh-contents) ; updage packages archive
       (package-install 'use-package)) ; and install the most recent version of use-package
 
+    ;; Start using use-package
     (require 'use-package)
     (setq use-package-always-ensure t))
-#+END_SRC
-Now that we are ready to laod packages, we need to make sure we will keep our modeline clean by using the dimish package.
-#+BEGIN_SRC emacs-lisp
-  (use-package diminish
-    :ensure t)
 #+END_SRC
 * Emacs
 ** IBuffer
@@ -631,7 +651,7 @@ Lets have some better looking bullets for our headers
 * Programming
 ** Ibuffer Version Control - called with C-x C-b (ibuffer-list-buffers)
 Pretty list buffer for version controlled files
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle off
   (use-package ibuffer-vc
     :ensure t
     :config
@@ -1019,9 +1039,29 @@ Personal attempt at bringing the blue theme to Doom Blue :)
      (provide 'doom-tomorrow-blue-theme)
  #+END_SRC
 ** Modeline
+*** Spaceline
+A popular and extensive modeline with tons of features.
+#+BEGIN_SRC emacs-lisp
+  (use-package spaceline
+    :ensure t
+    :hook (after-init . spaceline-spacemacs-theme)
+    :init
+    (setq powerline-default-separator 'arrow-fade)
+    (require 'spaceline-config)
+    (use-package fancy-battery
+      :ensure t
+      :hook (after-init . fancy-battery-mode)
+      :init
+      (display-battery-mode -1))
+    :config
+    (spaceline-toggle-minor-modes-off)
+    (spaceline-toggle-evil-state-on)
+    (spaceline-toggle-battery-on)
+    (spaceline-toggle-buffer-size-off))
+#+END_SRC
 *** Doom Modeline
  Doom powerline together with the Doom theme, clean and fast
- #+BEGIN_SRC emacs-lisp
+ #+BEGIN_SRC emacs-lisp :tangle off
    (use-package doom-modeline
      :ensure t
      :hook (after-init . doom-modeline-mode)
@@ -1041,6 +1081,7 @@ Personal attempt at bringing the blue theme to Doom Blue :)
       doom-modeline-github-interval (* 30 60)
       doom-modeline-mu4e t
       doom-modeline-ircstylize 'identity))
+   (require 'doom-modeline)
  #+END_SRC
 *** Moody Modeline
  This is the latest from the develoer of Magit, and thus has potential.
@@ -1052,9 +1093,15 @@ Personal attempt at bringing the blue theme to Doom Blue :)
      (moody-replace-mode-line-buffer-identification)
      (moody-replace-vc-mode))
  #+END_SRC
+*** Diminish
+Now that we are ready to laod packages, we need to make sure we will keep our modeline clean by using the dimish package.
+#+BEGIN_SRC emacs-lisp
+  (use-package diminish
+    :ensure t)
+#+END_SRC
 ** Dashboard
 Provide a decend startup screen.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp 
   (use-package dashboard
     :ensure t
     :config
