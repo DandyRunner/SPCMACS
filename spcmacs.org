@@ -48,11 +48,20 @@ Becomes
   :custom-face
   (Man-overstrike ((t (:inherit font-lock-type-face :bold t))))
 #+END_SRC
-- [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Hooks.html][add-hook]] → [[https://github.com/jwiegley/use-package#hooks][:hook]]
-- [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Changing-Key-Bindings.html][define-key]] → [[https://github.com/jwiegley/use-package#key-binding][:bind]]
-- Use [[https://github.com/jwiegley/use-package#loading-packages-in-sequence][:after]] if you need one package to be loaded after another.
 
- All defuns should go to packages/libraries. [[https://github.com/quelpa/quelpa][Quelpa]] really helps with that — you can make a package from whatever source yo want.
+All defuns should go to packages/libraries. [[https://github.com/quelpa/quelpa][Quelpa]] really helps with that — you can make a package from whatever source yo want.
+
+The power of use-package is in the multitude of keywords:
+- [[https://github.com/jwiegley/use-package#loading-packages-in-sequence][:after]] - if you need one package to be loaded after another.
+- :ensure t - causes package to be installed automatically if not already present
+- :dimisish /minor-mode/ - causes the minor mode activity not to show in the modeline
+- :init - code that runs before the package. Note it always happens before package load!
+- :config - code that runs after the packae has been loaded
+- [[https://github.com/jwiegley/use-package#customizing-variables][:custom]] - allows customization of package custom variables
+- :custom-face - allows customization of package custom faces
+- :commands - autoloads for those commands and defers loading of the module until they are used
+- [[https://github.com/jwiegley/use-package#key-binding][:bind]] - (instead if define-kye) bind the function to a key sequence, and defers loading until actually used
+- [[https://github.com/jwiegley/use-package#hooks][:hook]] - (instead of add-hook) allows adding functions onto hooks
 
 *** Fonts and colors.
 Hardcoding these can break themes, so you use [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Face-Attributes.html][:inherit]] for customizations.
@@ -333,16 +342,22 @@ that can be overiden later by installed packages to provide more complete functi
     :prefix "SPC"
     :states '(normal visual)
     :keymaps 'override
-    "a"   '(:ignore t :which-key "applications")
+    "a"   '(:ignore t :which-key "apps")
     "b"   '(:ignore t :which-key "buffer")
+    "c"   '(:ignore t :which-key "comment")
     "f"   '(:ignore t :which-key "file")
+    "F"   '(:ignore t :which-key "Frame")
     "fe"  '(:ignore t :which-key "emacs")
     "g"   '(:ignore t :which-key "git")
     "h"   '(:ignore t :which-key "help")
+    "j"   '(:ignore t :which-key "jump")
+    "n"   '(:ignore t :which-key "narrow")
     "p"   'projectile-command-map
     "s"   '(:ignore t :which-key "search")
+    "S"   '(:ignore t :which-key "spell-check")
     "t"   '(:ignore t :which-key "toggle")
-    "w"   '(:ignore t :which-key "window")) 
+    "w"   '(:ignore t :which-key "window")
+    "x"   '(:ignore t :which-key "text"))
 #+END_SRC
 ** SPC f - File
 #+BEGIN_SRC emacs-lisp
@@ -381,6 +396,25 @@ that can be overiden later by installed packages to provide more complete functi
 ** The End
 #+BEGIN_SRC emacs-lisp
     )
+#+END_SRC
+* Window Management
+** ace-window
+We need a way to select, swap, move, etc windows. Windows is ace :).
+#+BEGIN_SRC emacs-lisp
+  (use-package ace-window
+    :ensure t
+    :custom
+    (aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9) "Use numbers for selecting window.")
+    (aw-scope 'frame "Highlight only current frame.")
+    (aw-dispatch-always t "All functions work for two windows too")
+    :bind
+    ("M-o" . ace-window)
+    :general
+    (general-def
+      :prefix "SPC"
+      :states '(normal visual)
+      :keymaps 'override
+      "ww"  '(ace-select-window :wk "select window")))
 #+END_SRC
 * Evil Mode
 There is no better way but vim editing. This further allows for SPC for a leader key
@@ -435,10 +469,10 @@ In short - it provides an interface to list, search, filter and perform actions 
               '((t . ivy--regex-plus))))
      :general
      (general-def
-       :prefix "SPC"
+       :prefix "SPC b"
         :states '(normal visual)
         :keymaps 'override
-        "bm"  '(ivy-switch-buffer :wk "switch to buffer")))
+        "b"  '(ivy-switch-buffer :wk "buffer list")))
 
     ;; Used by Ivy to sort commands by frequency
     (use-package smex
