@@ -169,13 +169,272 @@ Additionally set package-enable-at-startup to nil to pacakages will not automati
     (require 'use-package)
     (setq use-package-always-ensure t))
 #+END_SRC
-* Emacs
+* Keybindings
+General is a generic package for concise key binding in emacs.
+This configuration sets up a spacemacs like keybinding - here using emacs default functions,
+that can be overiden later by installed packages to provide more complete functions.
+** The General Package
+#+BEGIN_SRC emacs-lisp 
+  (use-package general
+    :after which-key
+    :config
+    (general-override-mode 1)
+
+    (defun find-user-init-file ()
+      "Edit the `user-init-file', in the same window."
+      (interactive)
+      (find-file (expand-file-name "spcmacs.org" user-emacs-directory)))
+
+    (defun load-user-init-file ()
+      "Load the `user-init-file', in same window."
+      (interactive)
+      (load-file user-init-file))
+
+    (defun rename-file-and-buffer ()
+      "Rename the current buffer and file it is visiting."
+      (interactive)
+      (let ((filename (buffer-file-name)))
+        (if (not (and filename (file-exists-p filename)))
+            (message "Buffer is not visiting a file!")
+          (let ((new-name (read-file-name "New name: " filename)))
+            (cond
+             ((vc-backend filename) (vc-rename-file filename new-name))
+             (t
+              (rename-file filename new-name t)
+              (set-visited-file-name new-name t t)))))))
+
+    (general-create-definer evil-def
+      :states '(normal)
+      :prefix "SPC")
+
+    (general-create-definer emacs-def
+      :states '(emacs)
+      :prefix "s-SPC")
+
+    (general-def
+      :keymaps 'key-translation-map
+      "ESC" (kbd "C-g"))
+
+    (general-def
+      :prefix "C-c"
+      "a" 'org-agenda
+     "c" 'org-capture)
+#+END_SRC     
+** SPC
+#+BEGIN_SRC emacs-lisp
+  (general-def
+    :prefix "SPC"
+    :states '(normal visual)
+    :keymaps 'override
+    "a"   '(:ignore t :which-key "apps")
+    "b"   '(:ignore t :which-key "buffer")
+    "c"   '(:ignore t :which-key "comment")
+    "f"   '(:ignore t :which-key "file")
+    "F"   '(:ignore t :which-key "Frame")
+    "fe"  '(:ignore t :which-key "emacs")
+    "g"   '(:ignore t :which-key "git")
+    "h"   '(:ignore t :which-key "help")
+    "j"   '(:ignore t :which-key "jump")
+    "n"   '(:ignore t :which-key "narrow")
+    "p"   'projectile-command-map
+    "s"   '(:ignore t :which-key "search")
+    "S"   '(:ignore t :which-key "spell-check")
+    "t"   '(:ignore t :which-key "toggle")
+    "w"   '(:ignore t :which-key "window")
+    "x"   '(:ignore t :which-key "text"))
+#+END_SRC
+** SPC f - File
+#+BEGIN_SRC emacs-lisp
+  (general-def
+    :prefix "SPC f"
+    :states '(normal visual)
+    :keymaps 'override
+    "d"  '(fd-dired :wk "unknown")
+    "ed" '(find-user-init-file :wk "edit user config")
+    "eR" '(load-user-init-file :wk "reload user config")
+    "f"  '(find-file :wk "find file")
+    "s"  '(save-buffer :wk "save file"))
+#+END_SRC
+** SPC h - Help
+#+BEGIN_SRC emacs-lisp
+  (general-def
+    :prefix "SPC h"
+    :states '(normal visual)
+    :keymaps 'override
+    "d" '(:ignore t :wk "describe")
+    "db" '(describe-bindings :wk "describe bindings")
+    "dc" '(describe-char :wk "describe character")
+    "df" '(describe-function :wk "describe function")
+    "dk" '(describe-key :wk "describe key")
+    "dm" '(describe-mode :wk "describe mode")
+    "dp" '(describe-package :wk "describe package")
+    "dv" '(describe-variable :wk "describe variable")
+    "dt" '(describe-theme :wk "describe theme")
+    "ds" '(describe-symbol :wk "describe symbol")
+    "i"  '(info :wk "info")
+    "I"  '(info-display-manual :wk "info from manual")
+    "l"  '(find-library :wk "find library")
+    "n"  '(view-emacs-news :wk "emacs news")
+    "w"  '(woman :wk "woman"))
+#+END_SRC
+** The End
+#+BEGIN_SRC emacs-lisp
+    )
+#+END_SRC
+** Which Key
+What would we be without the key popup help appearing when hitting M-x or M-c?
+In combination with general.el we also have which-key help with the leader key SPC.
+#+BEGIN_SRC emacs-lisp
+  (use-package which-key
+    :ensure t
+    :diminish which-key-mode
+    :config (which-key-mode 1))
+#+END_SRC
+* Emacs improvements
+** Icons and faces
+Get some pretty symbols in our code and buffers by using all-the-icons (windows install manualy)
+#+BEGIN_SRC emacs-lisp
+  (use-package all-the-icons
+    :if (display-graphic-p)
+    :custom-face
+    ;; Reset colors since they are too dark in `doom-themes'
+    (all-the-icons-silver ((((background dark)) :foreground "#716E68")
+                           (((background light)) :foreground "#716E68")))
+    (all-the-icons-lsilver ((((background dark)) :foreground "#B9B6AA")
+                            (((background light)) :foreground "#7F7869")))
+    (all-the-icons-dsilver ((((background dark)) :foreground "#838484")
+                            (((background light)) :foreground "#838484")))
+;;    :init
+;;    (unless (or sys/win32p (member "all-the-icons" (font-family-list)))
+;;      (all-the-icons-install-fonts t))
+    :config
+    (add-to-list 'all-the-icons-icon-alist
+                 '("\\.go$" all-the-icons-fileicon "go" :face all-the-icons-blue))
+    (add-to-list 'all-the-icons-mode-icon-alist
+                 '(go-mode all-the-icons-fileicon "go" :face all-the-icons-blue))
+    (add-to-list 'all-the-icons-mode-icon-alist
+                 '(help-mode all-the-icons-faicon "info-circle" :height 1.1 :v-adjust -0.1 :face all-the-icons-purple))
+    (add-to-list 'all-the-icons-mode-icon-alist
+                 '(Info-mode all-the-icons-faicon "info-circle" :height 1.1 :v-adjust -0.1))
+    (add-to-list 'all-the-icons-icon-alist
+                 '("NEWS$" all-the-icons-faicon "newspaper-o" :height 0.9 :v-adjust -0.2))
+    (add-to-list 'all-the-icons-icon-alist
+                 '("Cask\\'" all-the-icons-fileicon "elisp" :height 1.0 :face all-the-icons-blue))
+    (add-to-list 'all-the-icons-mode-icon-alist
+                 '(cask-mode all-the-icons-fileicon "elisp" :height 1.0 :face all-the-icons-blue))
+    (add-to-list 'all-the-icons-icon-alist
+                 '(".*\\.ipynb\\'" all-the-icons-fileicon "jupyter" :height 1.2 :face all-the-icons-orange))
+    (add-to-list 'all-the-icons-mode-icon-alist
+                 '(ein:notebooklist-mode all-the-icons-faicon "book" :face all-the-icons-orange))
+    (add-to-list 'all-the-icons-mode-icon-alist
+                 '(ein:notebook-mode all-the-icons-fileicon "jupyter" :height 1.2 :face all-the-icons-orange))
+    (add-to-list 'all-the-icons-mode-icon-alist
+                 '(ein:notebook-multilang-mode all-the-icons-fileicon "jupyter" :height 1.2 :face all-the-icons-orange))
+    (add-to-list 'all-the-icons-icon-alist
+                 '("\\.epub\\'" all-the-icons-faicon "book" :height 1.0 :v-adjust -0.1 :face all-the-icons-green))
+    (add-to-list 'all-the-icons-mode-icon-alist
+                 '(nov-mode all-the-icons-faicon "book" :height 1.0 :v-adjust -0.1 :face all-the-icons-green))
+    (add-to-list 'all-the-icons-mode-icon-alist
+                 '(gfm-mode  all-the-icons-octicon "markdown" :face all-the-icons-blue)))
+
+#+END_SRC
 ** IBuffer
-I buffer provides need lists
+IBuffer is the emacs build in buffer system. It is used and linked to other packages like counsel and projectile to provide pretty lists.
 #+BEGIN_SRC emacs-lisp
   (use-package ibuffer
-    :bind
-    ([remap list-buffers] . ibuffer))
+    :ensure nil  
+    :functions (all-the-icons-icon-for-file
+                all-the-icons-icon-for-mode
+                all-the-icons-auto-mode-match?
+                all-the-icons-faicon)
+    :commands ibuffer-find-file
+    :bind ("C-x C-b" . ibuffer)
+    :general
+    (general-def
+      :prefix "SPC"
+      :states '(normal visual)
+      :keymaps 'override
+      "bb"  '(ibuffer-list-buffers :wk "buffer list"))
+    :config
+    (setq ibuffer-filter-group-name-face '(:inherit (font-lock-string-face bold)))
+
+    ;; Display buffer icons on GUI
+    (when (display-graphic-p)
+      ;; To be correctly aligned, the size of the name field must be equal to that
+      ;; of the icon column below, plus 1 (for the tab I inserted)
+      (define-ibuffer-column icon (:name "   ")
+        (let ((icon (if (and (buffer-file-name)
+                             (all-the-icons-auto-mode-match?))
+                        (all-the-icons-icon-for-file (file-name-nondirectory (buffer-file-name)) :v-adjust -0.05)
+                      (all-the-icons-icon-for-mode major-mode :v-adjust -0.05))))
+          (if (symbolp icon)
+              (setq icon (all-the-icons-faicon "file-o" :face 'all-the-icons-dsilver :height 0.8 :v-adjust 0.0))
+            icon)))
+
+      (let ((tab-width 1))
+        (setq ibuffer-formats '((mark modified read-only locked
+                                      ;; Here you may adjust by replacing :right with :center or :left
+                                      ;; According to taste, if you want the icon further from the name
+                                      " " (icon 1 -1 :left :elide) "\t" (name 18 18 :left :elide)
+                                      " " (size 9 -1 :right)
+                                      " " (mode 16 16 :left :elide) " " filename-and-process)
+                                (mark " " (name 16 -1) " " filename))))
+
+      (with-eval-after-load 'counsel
+        (defun my-ibuffer-find-file ()
+          (interactive)
+          (let ((default-directory (let ((buf (ibuffer-current-buffer)))
+                                     (if (buffer-live-p buf)
+                                         (with-current-buffer buf
+                                           default-directory)
+                                       default-directory))))
+            (counsel-find-file default-directory)))
+        (advice-add #'ibuffer-find-file :override #'my-ibuffer-find-file))
+
+      ;; Group ibuffer's list by project root
+      (use-package ibuffer-projectile
+        :functions (all-the-icons-octicon
+                    ibuffer-do-sort-by-alphabetic)
+        :hook ((ibuffer . (lambda ()
+                            (ibuffer-projectile-set-filter-groups)
+                            (unless (eq ibuffer-sorting-mode 'alphabetic)
+                              (ibuffer-do-sort-by-alphabetic)))))
+        :config
+        (setq ibuffer-projectile-prefix
+              (if (display-graphic-p)
+                  (concat
+                   (all-the-icons-octicon "file-directory"
+                                          :face ibuffer-filter-group-name-face
+                                          :v-adjust -0.05
+                                          :height 1.25)
+                   " ")
+                "Project: ")))))
+#+END_SRC
+** Ibuffer Version Control - called with C-x C-b (ibuffer-list-buffers)
+Pretty list buffer for version controlled files
+#+BEGIN_SRC emacs-lisp :tangle off
+  (use-package ibuffer-vc
+    :ensure t
+    :config
+    (define-ibuffer-column icon (:name "Icon" :inline t)
+      (all-the-icons-ivy--icon-mode major-mode))
+    :custom
+    (ibuffer-formats
+     '((mark modified read-only vc-status-mini " "
+             (name 18 18 :left :elide)
+             " "
+             (size 9 -1 :right)
+             " "
+             (mode 16 16 :left :elide)
+             " "
+             (vc-status 16 16 :left)
+             " "
+             vc-relative-file)))
+    :hook
+    (ibuffer . (lambda ()
+                 (ibuffer-vc-set-filter-groups-by-vc-root)
+                 (unless (eq ibuffer-sorting-mode 'alphabetic)
+                   (ibuffer-do-sort-by-alphabetic)))))
 #+END_SRC
 * Sensible defaults
 When using the graphical system in linux it is faster to create an .Xresources file in the home folder.
@@ -296,150 +555,30 @@ And now for the common defaults
         kept-new-versions 5    ; keep some new versions
         kept-old-versions 2)   ; and some old ones, too
 #+END_SRC
-* Which Key
-What would we be without the key popup help appearing when hitting M-x or M-c?
-In combination with general.el we also have which-key help with the leader key SPC.
-#+BEGIN_SRC emacs-lisp
-  (use-package which-key
-    :ensure t
-    :diminish which-key-mode
-    :config (which-key-mode 1))
-#+END_SRC
-* Keybindings
-General is a generic package for concise key binding in emacs.
-This configuration sets up a spacemacs like keybinding - here using emacs default functions,
-that can be overiden later by installed packages to provide more complete functions.
-** The General Package
-#+BEGIN_SRC emacs-lisp 
-  (use-package general
-    :after which-key
-    :config
-    (general-override-mode 1)
-
-    (defun find-user-init-file ()
-      "Edit the `user-init-file', in the same window."
-      (interactive)
-      (find-file (expand-file-name "spcmacs.org" user-emacs-directory)))
-
-    (defun load-user-init-file ()
-      "Load the `user-init-file', in same window."
-      (interactive)
-      (load-file user-init-file))
-
-    (defun rename-file-and-buffer ()
-      "Rename the current buffer and file it is visiting."
-      (interactive)
-      (let ((filename (buffer-file-name)))
-        (if (not (and filename (file-exists-p filename)))
-            (message "Buffer is not visiting a file!")
-          (let ((new-name (read-file-name "New name: " filename)))
-            (cond
-             ((vc-backend filename) (vc-rename-file filename new-name))
-             (t
-              (rename-file filename new-name t)
-              (set-visited-file-name new-name t t)))))))
-
-    (general-create-definer evil-def
-      :states '(normal)
-      :prefix "SPC")
-
-    (general-create-definer emacs-def
-      :states '(emacs)
-      :prefix "s-SPC")
-
-    (general-def
-      :keymaps 'key-translation-map
-      "ESC" (kbd "C-g"))
-
-    (general-def
-      :prefix "C-c"
-      "a" 'org-agenda
-     "c" 'org-capture)
-#+END_SRC     
-** SPC
-#+BEGIN_SRC emacs-lisp
-  (general-def
-    :prefix "SPC"
-    :states '(normal visual)
-    :keymaps 'override
-    "a"   '(:ignore t :which-key "apps")
-    "b"   '(:ignore t :which-key "buffer")
-    "c"   '(:ignore t :which-key "comment")
-    "f"   '(:ignore t :which-key "file")
-    "F"   '(:ignore t :which-key "Frame")
-    "fe"  '(:ignore t :which-key "emacs")
-    "g"   '(:ignore t :which-key "git")
-    "h"   '(:ignore t :which-key "help")
-    "j"   '(:ignore t :which-key "jump")
-    "n"   '(:ignore t :which-key "narrow")
-    "p"   'projectile-command-map
-    "s"   '(:ignore t :which-key "search")
-    "S"   '(:ignore t :which-key "spell-check")
-    "t"   '(:ignore t :which-key "toggle")
-    "w"   '(:ignore t :which-key "window")
-    "x"   '(:ignore t :which-key "text"))
-#+END_SRC
-** SPC f - File
-#+BEGIN_SRC emacs-lisp
-  (general-def
-    :prefix "SPC f"
-    :states '(normal visual)
-    :keymaps 'override
-    "d"  '(fd-dired :wk "unknown")
-    "ed" '(find-user-init-file :wk "edit user config")
-    "eR" '(load-user-init-file :wk "reload user config")
-    "f"  '(find-file :wk "find file")
-    "s"  '(save-buffer :wk "save file"))
-#+END_SRC
-** SPC h - Help
-#+BEGIN_SRC emacs-lisp
-  (general-def
-    :prefix "SPC h"
-    :states '(normal visual)
-    :keymaps 'override
-    "d" '(:ignore t :wk "describe")
-    "db" '(describe-bindings :wk "describe bindings")
-    "dc" '(describe-char :wk "describe character")
-    "df" '(describe-function :wk "describe function")
-    "dk" '(describe-key :wk "describe key")
-    "dm" '(describe-mode :wk "describe mode")
-    "dp" '(describe-package :wk "describe package")
-    "dv" '(describe-variable :wk "describe variable")
-    "dt" '(describe-theme :wk "describe theme")
-    "ds" '(describe-symbol :wk "describe symbol")
-    "i"  '(info :wk "info")
-    "I"  '(info-display-manual :wk "info from manual")
-    "l"  '(find-library :wk "find library")
-    "n"  '(view-emacs-news :wk "emacs news")
-    "w"  '(woman :wk "woman"))
-#+END_SRC
-** The End
-#+BEGIN_SRC emacs-lisp
-    )
-#+END_SRC
 * Window Management
 ** ace-window
 We need a way to select, swap, move, etc windows. Windows is ace :).
 #+BEGIN_SRC emacs-lisp
-      (use-package ace-window
-        :ensure t
-        :custom
-        (aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9) "Use numbers for selecting window.")
-        (aw-scope 'frame "Highlight only current frame.")
-        (aw-dispatch-always t "All functions work for two windows too")
-        (ace-window-display-mode t "Always show the window number")
-        :bind
-        ("M-o" . ace-window)
-        :general
-        (general-def
-          :prefix "SPC"
-          :states '(normal visual)
-          :keymaps 'override
-          "wd"  '(ace-delete-window :wk "delete")
-          "wD"  '(ace-delete-other-windows :wk "delete others")
-          "wm"  '(ace-maximize-window :wk "maximize")
-          "ws"  '(ace-swap-window   :wk "swap")
-          "ww"  '(ace-select-window :wk "select"))) 
+  (use-package ace-window
+    :ensure t
+    :after general
+    :custom
+    (aw-keys '(?1 ?2 ?3 ?4 ?5 ?6 ?7 ?8 ?9) "Use numbers for selecting window.")
+    (aw-scope 'frame "Highlight only current frame.")
+    (aw-dispatch-always t "All functions work for two windows too")
+    (ace-window-display-mode t "Always show the window number")
+    :bind
+    ("M-o" . ace-window)
+    :general
+    (general-def
+      :prefix "SPC"
+      :states '(normal visual)
+      :keymaps 'override
+      "wd"  '(ace-delete-window :wk "delete")
+      "wD"  '(ace-delete-other-windows :wk "delete others")
+      "wm"  '(ace-maximize-window :wk "maximize")
+      "ws"  '(ace-swap-window   :wk "swap")
+      "ww"  '(ace-select-window :wk "select"))) 
 #+END_SRC
 * Evil Mode
 There is no better way but vim editing. This further allows for SPC for a leader key
@@ -478,32 +617,26 @@ When Emacs prompts for a string from a list of several possible choices,
 Ivy springs into action to assist in narrowing and picking the right string from a vast number of choices.
 In short - it provides an interface to list, search, filter and perform actions on a collection of "things".
 #+BEGIN_SRC emacs-lisp
-    (use-package ivy
-      :ensure t
-      :hook (after-init . ivy-mode)
-      :commands (ivy-switch-buffer)
-      :diminish ivy-mode
-      :config
-      (progn
-        (setq ivy-use-virtual-buffers t
-              ivy-count-format "(%d/%d) "
-              ivy-truncate-lines nil
-              ivy-initial-inputs-alist nil
-              ivy-display-style 'fancy)
-        (setq ivy-re-builders-alist
-              '((t . ivy--regex-plus))))
-     :general
-     (general-def
-       :prefix "SPC b"
-        :states '(normal visual)
-        :keymaps 'override
-        "b"  '(ivy-switch-buffer :wk "buffer list")))
+  (use-package ivy
+    :ensure t
+    :hook (after-init . ivy-mode)
+    :commands (ivy-switch-buffer)
+    :diminish ivy-mode
+    :config
+    (progn
+      (setq ivy-use-virtual-buffers t
+            ivy-count-format "(%d/%d) "
+            ivy-truncate-lines nil
+            ivy-initial-inputs-alist nil
+            ivy-display-style 'fancy)
+      (setq ivy-re-builders-alist
+            '((t . ivy--regex-plus)))))
 
-    ;; Used by Ivy to sort commands by frequency
-    (use-package smex
-      :hook (after-init . smex-initialize)
-      :config
-      (global-set-key (kbd "M-X") 'smex-major-mode-commands))
+  ;; Used by Ivy to sort commands by frequency
+  (use-package smex
+    :hook (after-init . smex-initialize)
+    :config
+    (global-set-key (kbd "M-X") 'smex-major-mode-commands))
 #+END_SRC
 ** Counsel
 To keep concerns separated, Ivy doesn't have a lot of other functionality.
@@ -649,32 +782,6 @@ Lets have some better looking bullets for our headers
     (org-mode . org-bullets-mode))
 #+END_SRC
 * Programming
-** Ibuffer Version Control - called with C-x C-b (ibuffer-list-buffers)
-Pretty list buffer for version controlled files
-#+BEGIN_SRC emacs-lisp :tangle off
-  (use-package ibuffer-vc
-    :ensure t
-    :config
-    (define-ibuffer-column icon (:name "Icon" :inline t)
-      (all-the-icons-ivy--icon-mode major-mode))
-    :custom
-    (ibuffer-formats
-     '((mark modified read-only vc-status-mini " "
-             (name 18 18 :left :elide)
-             " "
-             (size 9 -1 :right)
-             " "
-             (mode 16 16 :left :elide)
-             " "
-             (vc-status 16 16 :left)
-             " "
-             vc-relative-file)))
-    :hook
-    (ibuffer . (lambda ()
-                 (ibuffer-vc-set-filter-groups-by-vc-root)
-                 (unless (eq ibuffer-sorting-mode 'alphabetic)
-                   (ibuffer-do-sort-by-alphabetic)))))
-#+END_SRC
 * Version Control
 ** Magit
 The second next best reason to use emacs. The Magit package provides an excellent interface to the complexity of Git.
@@ -1041,7 +1148,7 @@ Personal attempt at bringing the blue theme to Doom Blue :)
 ** Modeline
 *** Spaceline
 A popular and extensive modeline with tons of features.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle off
   (use-package spaceline
     :ensure t
     :hook (after-init . spaceline-spacemacs-theme)
@@ -1061,7 +1168,7 @@ A popular and extensive modeline with tons of features.
 #+END_SRC
 *** Doom Modeline
  Doom powerline together with the Doom theme, clean and fast
- #+BEGIN_SRC emacs-lisp :tangle off
+ #+BEGIN_SRC emacs-lisp
    (use-package doom-modeline
      :ensure t
      :hook (after-init . doom-modeline-mode)
@@ -1071,7 +1178,7 @@ A popular and extensive modeline with tons of features.
       doom-modeline-icon t
       doom-modeline-major-mode-icon t
       doom-modeline-major-mode-color-icon t
-      doom-modeline-minor-modes t
+;;    doom-modeline-minor-modes t
       doom-modeline-word-count t
       doom-modeline-checker-simple-format t
       doom-modeline-vcs-max-length 12
@@ -1093,6 +1200,17 @@ A popular and extensive modeline with tons of features.
      (moody-replace-mode-line-buffer-identification)
      (moody-replace-vc-mode))
  #+END_SRC
+*** Hide Modeline
+Under some circumstances the modeline should be hidden
+#+BEGIN_SRC emacs-lisp
+  (use-package hide-mode-line
+              :hook
+              (((completion-list-mode
+                 completion-in-region-mode
+                 neotree-mode
+                 treemacs-mode)
+                . hide-mode-line-mode)))
+#+END_SRC
 *** Diminish
 Now that we are ready to laod packages, we need to make sure we will keep our modeline clean by using the dimish package.
 #+BEGIN_SRC emacs-lisp
@@ -1129,7 +1247,7 @@ Our configuration file has loaded. Time to enable garbage collection again, and 
 Tangle this file to create the spcmacs.el file, which speeds up loading emacs.
 #+BEGIN_SRC emcas-lisp
 (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
-#+END_SRC
+#+END_SRC 
 * Notes
 ** Profiling
 Install esup, and run the commmand form the commandline....
