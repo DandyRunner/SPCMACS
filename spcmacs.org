@@ -110,8 +110,8 @@ Garbage collection on hold while the init scrips runs, and redirect the custom p
   (setq file-name-handler-alist nil)
 #+END_SRC
 * Package Sources
-** Local mirror
-Here is fo r local mirror:
+** ocal mirror
+Here is for local mirror:
 #+BEGIN_SRC emacs-lisp
   (eval-when-compile
     (require 'package)
@@ -582,7 +582,7 @@ We need a way to select, swap, move, etc windows. Windows is ace :).
 #+END_SRC
 * Evil Mode
 There is no better way but vim editing. This further allows for SPC for a leader key
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp 
   (use-package evil
     :hook (after-init . evil-mode)
     :config
@@ -600,7 +600,7 @@ There is no better way but vim editing. This further allows for SPC for a leader
 #+END_SRC 
 ** Evil Commentary
 Handy tool to comment blocks of code
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
 (use-package evil-commentary
   :after evil
   :config
@@ -781,6 +781,20 @@ Lets have some better looking bullets for our headers
     :hook
     (org-mode . org-bullets-mode))
 #+END_SRC
+** Org Brain
+The perfect way to map several org files and build a map of thought or notes.
+It's based on the brain principle and supports Parents, Children and Friends.
+#+BEGIN_SRC emacs-lisp
+  (use-package org-brain
+    :ensure t
+    :init
+    (setq org-brain-path "`~/Org/brain")
+    (with-eval-after-load 'evil
+                          (evil-set-initial-state 'org-brain-visualise-mode 'emacs))
+    :config
+    (setq org-id-track-globally t))
+
+#+END_SRC
 * Programming
 * Version Control
 ** Magit
@@ -795,18 +809,12 @@ The second next best reason to use emacs. The Magit package provides an excellen
  #+END_SRC
 * UI
 ** Themes
-*** Theme Tools
-#+BEGIN_SRC emacs-lisp
-  (use-package rainbow-mode
-    :ensure t
-    :diminish rainbow-mode
-    :commands (rainbow-mode))
-#+END_SRC
 *** Doom Themes
  #+BEGIN_SRC emacs-lisp
    (use-package doom-themes
+     :ensure t
      :config
-     (doom-themes-org-config)
+     ;;(doom-themes-org-config)
      (defun load-doom-one ()
          "Load Doom One theme"
        (interactive)
@@ -861,311 +869,14 @@ The second next best reason to use emacs. The Magit package provides an excellen
      "tsd" 'load-sanityinc-dark
      "tsl" 'load-sanityinc-light))
 #+END_SRC
-*** Doom One Blue Custom
-#+BEGIN_SRC emacs-lisp :tangle off
-  (require 'doom-themes)
-
-  (defgroup doom-one-theme nil
-    "Options for doom-themes"
-    :group 'doom-themes)
-
-  (defcustom doom-one-brighter-modeline nil
-    "If non-nil, more vivid colors will be used to style the mode-line."
-    :group 'doom-one-theme
-    :type 'boolean)
-
-  (defcustom doom-one-brighter-comments nil
-    "If non-nil, comments will be highlighted in more vivid colors."
-    :group 'doom-one-theme
-    :type 'boolean)
-
-  (defcustom doom-one-comment-bg doom-one-brighter-comments
-    "If non-nil, comments will have a subtle, darker background. Enhancing their
-  legibility."
-    :group 'doom-one-theme
-    :type 'boolean)
-
-  (defcustom doom-one-padded-modeline doom-themes-padded-modeline
-    "If non-nil, adds a 4px padding to the mode-line. Can be an integer to
-  determine the exact padding."
-    :group 'doom-one-theme
-    :type '(or integer boolean))
-
-  (def-doom-theme doom-one
-    "A dark theme inspired by Atom One Dark"
-
-    ;; name        default   256       16
-    ((bg         '("#FFFFFF" nil       nil            ))
-     (bg-alt     '("#21242b" nil       nil            ))
-     (base0      '("#1B2229" "black"   "black"        ))
-     (base1      '("#1c1f24" "#1e1e1e" "brightblack"  ))
-     (base2      '("#202328" "#2e2e2e" "brightblack"  ))
-     (base3      '("#23272e" "#262626" "brightblack"  ))
-     (base4      '("#3f444a" "#3f3f3f" "brightblack"  ))
-     (base5      '("#5B6268" "#525252" "brightblack"  ))
-     (base6      '("#73797e" "#6b6b6b" "brightblack"  ))
-     (base7      '("#9ca0a4" "#979797" "brightblack"  ))
-     (base8      '("#DFDFDF" "#dfdfdf" "white"        ))
-     (fg         '("#bbc2cf" "#bfbfbf" "brightwhite"  ))
-     (fg-alt     '("#5B6268" "#2d2d2d" "white"        ))
-
-     (grey       base4)
-     (red        '("#ff6c6b" "#ff6655" "red"          ))
-     (orange     '("#da8548" "#dd8844" "brightred"    ))
-     (green      '("#98be65" "#99bb66" "green"        ))
-     (teal       '("#4db5bd" "#44b9b1" "brightgreen"  ))
-     (yellow     '("#ECBE7B" "#ECBE7B" "yellow"       ))
-     (blue       '("#51afef" "#51afef" "brightblue"   ))
-     (dark-blue  '("#2257A0" "#2257A0" "blue"         ))
-     (magenta    '("#c678dd" "#c678dd" "brightmagenta"))
-     (violet     '("#a9a1e1" "#a9a1e1" "magenta"      ))
-     (cyan       '("#46D9FF" "#46D9FF" "brightcyan"   ))
-     (dark-cyan  '("#5699AF" "#5699AF" "cyan"         ))
-
-     ;; face categories -- required for all themes
-     (highlight      blue)
-     (vertical-bar   (doom-darken base1 0.1))
-     (selection      dark-blue)
-     (builtin        magenta)
-     (comments       (if doom-one-brighter-comments dark-cyan base5))
-     (doc-comments   (doom-lighten (if doom-one-brighter-comments dark-cyan base5) 0.25))
-     (constants      violet)
-     (functions      magenta)
-     (keywords       blue)
-     (methods        cyan)
-     (operators      blue)
-     (type           yellow)
-     (strings        green)
-     (variables      (doom-lighten magenta 0.4))
-     (numbers        orange)
-     (region         `(,(doom-lighten (car bg-alt) 0.15) ,@(doom-lighten (cdr base0) 0.35)))
-     (error          red)
-     (warning        yellow)
-     (success        green)
-     (vc-modified    orange)
-     (vc-added       green)
-     (vc-deleted     red)
-
-     ;; custom categories
-     (hidden     `(,(car bg) "black" "black"))
-     (-modeline-bright doom-one-brighter-modeline)
-     (-modeline-pad
-      (when doom-one-padded-modeline
-        (if (integerp doom-one-padded-modeline) doom-one-padded-modeline 4)))
-
-     (modeline-fg     nil)
-     (modeline-fg-alt base5)
-
-     (modeline-bg
-      (if -modeline-bright
-          (doom-darken blue 0.475)
-        `(,(doom-darken (car bg-alt) 0.15) ,@(cdr base0))))
-     (modeline-bg-l
-      (if -modeline-bright
-          (doom-darken blue 0.45)
-        `(,(doom-darken (car bg-alt) 0.1) ,@(cdr base0))))
-     (modeline-bg-inactive   `(,(doom-darken (car bg-alt) 0.1) ,@(cdr bg-alt)))
-     (modeline-bg-inactive-l `(,(car bg-alt) ,@(cdr base1))))
-
-
-    ;; --- extra faces ------------------------
-    ((elscreen-tab-other-screen-face :background "#353a42" :foreground "#1e2022")
-
-     (evil-goggles-default-face :inherit 'region :background (doom-blend region bg 0.5))
-
-     ((line-number &override) :foreground base4)
-     ((line-number-current-line &override) :foreground fg)
-
-     (font-lock-comment-face
-      :foreground comments
-      :background (if doom-one-comment-bg (doom-lighten bg 0.05)))
-     (font-lock-doc-face
-      :inherit 'font-lock-comment-face
-      :foreground doc-comments)
-
-     (mode-line
-      :background modeline-bg :foreground modeline-fg
-      :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg)))
-     (mode-line-inactive
-      :background modeline-bg-inactive :foreground modeline-fg-alt
-      :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-inactive)))
-     (mode-line-emphasis
-      :foreground (if -modeline-bright base8 highlight))
-
-     (solaire-mode-line-face
-      :inherit 'mode-line
-      :background modeline-bg-l
-      :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-l)))
-     (solaire-mode-line-inactive-face
-      :inherit 'mode-line-inactive
-      :background modeline-bg-inactive-l
-      :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-inactive-l)))
-
-     ;; Doom modeline
-     (doom-modeline-bar :background (if -modeline-bright modeline-bg highlight))
-     (doom-modeline-buffer-file :inherit 'mode-line-buffer-id :weight 'bold)
-     (doom-modeline-buffer-path :inherit 'mode-line-emphasis :weight 'bold)
-     (doom-modeline-buffer-project-root :foreground green :weight 'bold)
-
-     ;; ivy-mode
-     (ivy-current-match :background dark-blue :distant-foreground base0 :weight 'normal)
-
-     ;; --- major-mode faces -------------------
-     ;; css-mode / scss-mode
-     (css-proprietary-property :foreground orange)
-     (css-property             :foreground green)
-     (css-selector             :foreground blue)
-
-     ;; markdown-mode
-     (markdown-markup-face :foreground base5)
-     (markdown-header-face :inherit 'bold :foreground red)
-     (markdown-code-face :background (doom-lighten base3 0.05))
-
-     ;; org-mode
-     (org-hide :foreground hidden)
-     (solaire-org-hide-face :foreground hidden))
-
-
-    ;; --- extra variables ---------------------
-    ;; ()
-    )
-#+END_SRC
-*** Doom Themes Blue (Custom)
-Personal attempt at bringing the blue theme to Doom Blue :)
-  #+BEGIN_SRC emacs-lisp :tangle off 
-    (require 'doom-themes)
-    (defgroup doom-tomorrow-blue-theme nil
-      "Options for doom-themes"
-      :group 'doom-themes)
-
-    (defcustom doom-tomorrow-blue-padded-modeline doom-themes-padded-modeline
-      "If non-nil, adds a 4px padding to the mode-line.
-    Can be an integer to determine the exact padding."
-      :group 'doom-tomorrow-blue-theme
-      :type '(or integer boolean))
-
-    (def-doom-theme doom-tomorrow-blue
-      "A theme based off of Chris Kempson's Tomorrow Blue."
-
-      ;; name        gui       256       16
-      ((bg         '("#ffffff" "white"   "white" ))
-       (bg-alt     '("#eaeaea" nil       nil     ))
-       (base0      '("#f2f2f2" "white"   "white" ))
-       (base1      '("#e4e4e4" "#e4e4e4"         ))
-       (base2      '("#dedede" "#cccccc"         ))
-       (base3      '("#d6d4d4" "#cccccc" "silver"))
-       (base4      '("#C0bfbf" "#c0c0c0" "silver"))
-       (base5      '("#a3a1a1" "#adadad" "silver"))
-       (base6      '("#8a8787" "#949494" "silver"))
-       (base7      '("#696769" "#6b6b6b" "silver"))
-       (base8      '("#000000" "#000000" "black" ))
-       (fg         '("#4d4d4c" "#3a3a3a" "black"))
-       (fg-alt     (doom-darken fg 0.6))
-
-       (grey       '("#a5a4a5" "#999999" "silver"))
-       (red        '("#c82829" "#cc3333" "red"))
-       (orange     '("#f5871f" "#ff9933" "brightred"))
-       (yellow     '("#eab700" "#ffcc00" "yellow"))
-       (green      '("#718c00" "#669900" "green"))
-       (blue       '("#3e999f" "#339999" "brightblue"))
-       (dark-blue  '("#4271ae" "#336699" "blue"))
-       (teal       blue) ; FIXME replace with real teal
-       (magenta    '("#c9b4cf" "#c9b4cf" "magenta"))
-       (violet     '("#8959a8" "#996699" "brightmagenta"))
-       (cyan       '("#8abeb7" "#8abeb7" "cyan"))
-       (dark-cyan  (doom-lighten cyan 0.4))
-
-       ;; face categories
-       (highlight      dark-blue)
-       (vertical-bar   base0)
-       (selection      base3)
-       (builtin        blue)
-       (comments       grey)
-       (doc-comments   (doom-darken grey 0.1))
-       (constants      orange)
-       (functions      blue)
-       (keywords       violet)
-       (methods        blue)
-       (operators      fg)
-       (type           yellow)
-       (strings        green)
-       (variables      red)
-       (numbers        orange)
-       (region         selection)
-       (error          red)
-       (warning        yellow)
-       (success        green)
-       (vc-modified    fg-alt)
-       (vc-added       green)
-       (vc-deleted     red)
-
-       ;; custom categories
-       (modeline-bg     `(,(doom-darken (car bg) 0.1) ,@(cdr base3)))
-       (modeline-bg-alt `(,(doom-darken (car bg) 0.14) ,@(cdr base1)))
-       (modeline-fg     base8)
-       (modeline-fg-alt comments)
-       (-modeline-pad
-        (when doom-tomorrow-blue-padded-modeline
-          (if (integerp doom-tomorrow-blue-padded-modeline)
-              doom-tomorrow-blue-padded-modeline
-            4))))
-
-      ;; --- faces ------------------------------
-      ((doom-modeline-buffer-path       :foreground violet :bold bold)
-       (doom-modeline-buffer-major-mode :inherit 'doom-modeline-buffer-path)
-
-       ((line-number &override) :foreground base4)
-       ((line-number-current-line &override) :foreground blue :bold bold)
-
-       (ivy-current-match :background region :distant-foreground grey :weight 'ultra-bold)
-       (ivy-minibuffer-match-face-1 :foreground base5 :weight 'light)
-       (ivy-minibuffer-match-face-2 :inherit 'ivy-minibuffer-match-face-1 :foreground violet :weight 'ultra-bold)
-       (ivy-minibuffer-match-face-3 :inherit 'ivy-minibuffer-match-face-2 :foreground blue)
-       (ivy-minibuffer-match-face-4 :inherit 'ivy-minibuffer-match-face-2 :foreground red)
-
-       ;; rainbow-delimiters
-       (rainbow-delimiters-depth-1-face :foreground violet)
-       (rainbow-delimiters-depth-2-face :foreground blue)
-       (rainbow-delimiters-depth-3-face :foreground orange)
-       (rainbow-delimiters-depth-4-face :foreground green)
-       (rainbow-delimiters-depth-5-face :foreground magenta)
-       (rainbow-delimiters-depth-6-face :foreground yellow)
-       (rainbow-delimiters-depth-7-face :foreground teal)
-
-       (mode-line
-        :background modeline-bg :foreground modeline-fg
-        :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg)))
-       (mode-line-inactive
-        :background modeline-bg-alt :foreground modeline-fg-alt
-        :box (if -modeline-pad `(:line-width ,-modeline-pad :color ,modeline-bg-alt))))
-
-      ;; --- variables --------------------------
-      ;; ()
-      )
-
-     (provide 'doom-tomorrow-blue-theme)
- #+END_SRC
-** Modeline
-*** Spaceline
-A popular and extensive modeline with tons of features.
-#+BEGIN_SRC emacs-lisp :tangle off
-  (use-package spaceline
+*** Theme Tools
+#+BEGIN_SRC emacs-lisp
+  (use-package rainbow-mode
     :ensure t
-    :hook (after-init . spaceline-spacemacs-theme)
-    :init
-    (setq powerline-default-separator 'arrow-fade)
-    (require 'spaceline-config)
-    (use-package fancy-battery
-      :ensure t
-      :hook (after-init . fancy-battery-mode)
-      :init
-      (display-battery-mode -1))
-    :config
-    (spaceline-toggle-minor-modes-off)
-    (spaceline-toggle-evil-state-on)
-    (spaceline-toggle-battery-on)
-    (spaceline-toggle-buffer-size-off))
+    :diminish rainbow-mode
+    :commands (rainbow-mode))
 #+END_SRC
+** Modeline
 *** Doom Modeline
  Doom powerline together with the Doom theme, clean and fast
  #+BEGIN_SRC emacs-lisp
@@ -1190,6 +901,26 @@ A popular and extensive modeline with tons of features.
       doom-modeline-ircstylize 'identity))
    (require 'doom-modeline)
  #+END_SRC
+*** Spaceline
+A popular and extensive modeline with tons of features.
+#+BEGIN_SRC emacs-lisp :tangle off
+  (use-package spaceline
+    :ensure t
+    :hook (after-init . spaceline-spacemacs-theme)
+    :init
+    (setq powerline-default-separator 'arrow-fade)
+    (require 'spaceline-config)
+    (use-package fancy-battery
+      :ensure t
+      :hook (after-init . fancy-battery-mode)
+      :init
+      (display-battery-mode -1))
+    :config
+    (spaceline-toggle-minor-modes-off)
+    (spaceline-toggle-evil-state-on)
+    (spaceline-toggle-battery-on)
+    (spaceline-toggle-buffer-size-off))
+#+END_SRC
 *** Moody Modeline
  This is the latest from the develoer of Magit, and thus has potential.
  Bt still in early stages, and appears rather simple in functionality yet
@@ -1219,7 +950,7 @@ Now that we are ready to laod packages, we need to make sure we will keep our mo
 #+END_SRC
 ** Dashboard
 Provide a decend startup screen.
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package dashboard
     :ensure t
     :config
